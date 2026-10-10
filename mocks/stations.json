@@ -1,0 +1,26 @@
+[
+  {
+    "station_id": "DL_ANANDVIHAR",
+    "name": "Anand Vihar",
+    "lat": 28.6476,
+    "lng": 77.3158,
+    "aqi": 199,
+    "band": "Moderate"
+  },
+  {
+    "station_id": "DL_ITO",
+    "name": "ITO",
+    "lat": 28.6286,
+    "lng": 77.2410,
+    "aqi": 215,
+    "band": "Poor"
+  },
+  {
+    "station_id": "DL_PUNJABIBAGH",
+    "name": "Punjabi Bagh",
+    "lat": 28.6738,
+    "lng": 77.1306,
+    "aqi": 320,
+    "band": "Very Poor"
+  }
+]

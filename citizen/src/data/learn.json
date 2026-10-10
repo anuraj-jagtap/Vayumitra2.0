@@ -1,0 +1,82 @@
+[
+  {
+    "id": "pm-basics",
+    "title": "What are PM2.5, PM10 and NO2?",
+    "icon": "Wind",
+    "summary": "Learn how these microscopic pollutants enter your body — from your nose to your bloodstream.",
+    "content": "PM2.5 are fine particles smaller than 2.5 micrometers — about 30 times thinner than a human hair. They bypass your nose and throat and penetrate deep into your lungs. PM10 particles (up to 10 micrometers) are filtered partly by your nose and throat but can still reach your bronchial tubes. NO2 (nitrogen dioxide) comes from vehicle exhaust and industrial burning. It irritates the airways and can trigger asthma attacks. Once inhaled, PM2.5 particles can enter your bloodstream and reach your heart, brain, and other organs.",
+    "quiz": [
+      { "q": "Which particle is smaller?", "options": ["PM10", "PM2.5", "NO2", "CO2"], "answer": 1 },
+      { "q": "What is the main source of NO2 in cities?", "options": ["Cooking gas", "Vehicle exhaust", "Air conditioners", "Coal mines"], "answer": 1 },
+      { "q": "Where can PM2.5 ultimately reach in the body?", "options": ["Only lungs", "Only nose", "Bloodstream and organs", "Skin only"], "answer": 2 }
+    ]
+  },
+  {
+    "id": "body-effects",
+    "title": "How air pollution affects your body",
+    "icon": "Activity",
+    "summary": "A body-map look at how pollution impacts lungs, heart, brain, eyes, and skin.",
+    "content": "Lungs: Pollution irritates and inflames airways, reducing lung capacity over time. Heart: Fine particles entering the bloodstream can trigger inflammation, narrowing arteries and raising heart attack risk. Brain: Studies link long-term pollution exposure to cognitive decline and increased stroke risk. Eyes: High pollution causes redness, watering, and can worsen conditions like conjunctivitis. Skin: Airborne particles clog pores and accelerate skin aging and can trigger eczema flare-ups.",
+    "quiz": [
+      { "q": "Which organ can be affected by particles entering the bloodstream?", "options": ["Only lungs", "Lungs and heart", "Heart, brain, lungs", "Only heart"], "answer": 2 },
+      { "q": "What does pollution do to the arteries?", "options": ["Widens them", "No effect", "Narrows them via inflammation", "Hardens them immediately"], "answer": 2 },
+      { "q": "Which skin condition can pollution trigger?", "options": ["Psoriasis", "Eczema", "Vitiligo", "Rosacea"], "answer": 1 }
+    ]
+  },
+  {
+    "id": "short-long-effects",
+    "title": "Health effects by exposure",
+    "icon": "Clock",
+    "summary": "Short-term: coughs and irritation. Long-term: lung and heart disease.",
+    "content": "Short-term effects (hours to days): eye irritation, coughing, throat irritation, worsening of asthma and bronchitis, reduced lung function. Long-term effects (years): chronic obstructive pulmonary disease (COPD), lung cancer, cardiovascular disease, reduced life expectancy. Children who grow up in high-pollution areas develop smaller lung capacity. Elderly and those with pre-existing conditions face higher risk at all exposure levels.",
+    "quiz": [
+      { "q": "Which is a short-term health effect?", "options": ["Lung cancer", "COPD", "Eye irritation", "Heart disease"], "answer": 2 },
+      { "q": "Who is most vulnerable to health effects at all exposure levels?", "options": ["Teenagers", "Adult men", "Elderly and pre-existing conditions", "Athletes"], "answer": 2 },
+      { "q": "What long-term effect does childhood pollution exposure have?", "options": ["Stronger immunity", "Reduced lung capacity", "Better heart rate", "No proven effect"], "answer": 1 }
+    ]
+  },
+  {
+    "id": "what-should-i-do",
+    "title": "What should I do?",
+    "icon": "Shield",
+    "summary": "Actions by AQI band: masks, staying indoors, purifiers, ventilation.",
+    "content": "Good (0–50): No precautions needed. Enjoy outdoor activity.\nSatisfactory (51–100): Generally safe. Sensitive people may want to avoid heavy exertion.\nModerate (101–200): Unusually sensitive people should consider reducing exertion. Keep windows closed during peak traffic hours.\nPoor (201–300): Everyone should reduce prolonged outdoor exertion. Wear N95 mask outdoors. Run a purifier if available.\nVery Poor (301–400): Avoid all outdoor exertion. Keep windows closed. N95 mask essential outdoors.\nSevere (401+): Stay indoors. Keep windows and doors sealed. Run purifier on max. Visit a doctor if symptoms develop.",
+    "quiz": [
+      { "q": "At which AQI level should everyone avoid outdoor exertion?", "options": ["Moderate (101-200)", "Satisfactory (51-100)", "Poor (201-300)", "Good (0-50)"], "answer": 2 },
+      { "q": "What type of mask is recommended for Very Poor and above?", "options": ["Cloth mask", "Surgical mask", "N95 mask", "No mask needed"], "answer": 2 },
+      { "q": "At Severe AQI, what should you do about windows?", "options": ["Open them wide", "Keep them partially open", "Keep them closed and sealed", "It does not matter"], "answer": 2 }
+    ]
+  },
+  {
+    "id": "delhi-winter",
+    "title": "Why Delhi gets bad in winter",
+    "icon": "Flame",
+    "summary": "Stubble burning, temperature inversion, Diwali firecrackers, and traffic — the perfect storm.",
+    "content": "Every October–November, Delhi faces some of the world's worst air quality. Four main reasons:\n1. Stubble burning: Farmers in Punjab and Haryana burn leftover crop stubble — releasing smoke that drifts into Delhi.\n2. Temperature inversion: Cold air traps a warm air layer above the city, acting like a lid that traps pollutants near the ground.\n3. Diwali firecrackers: A single night of firecrackers can spike PM2.5 by 5–10 times over the base level.\n4. Traffic and industry: In winter, calm winds and cold air reduce pollutant dispersal, making everyday emissions accumulate faster.",
+    "quiz": [
+      { "q": "What does temperature inversion do to pollution?", "options": ["Disperses it upward", "Traps it near the ground", "Has no effect", "Reduces it"], "answer": 1 },
+      { "q": "Which states' stubble burning most affects Delhi?", "options": ["UP and Bihar", "Rajasthan and Gujarat", "Punjab and Haryana", "Himachal and Uttarakhand"], "answer": 2 },
+      { "q": "By how much can Diwali firecrackers spike PM2.5?", "options": ["2x", "5–10x", "100x", "No change"], "answer": 1 }
+    ]
+  },
+  {
+    "id": "myths-facts",
+    "title": "Myths vs Facts",
+    "icon": "CheckCircle",
+    "summary": "Common misconceptions about air quality — debunked with evidence.",
+    "content": "Myth: Cloth masks protect against PM2.5. Fact: Standard cloth masks filter only 10–20% of fine PM2.5 particles. N95 masks filter 95%+ when properly fitted.\nMyth: You can see when air is polluted. Fact: Some of the most harmful gases (NO2, CO) are invisible and odorless.\nMyth: Indoor air is always safer. Fact: Indoor air can be 2–5x more polluted than outdoor air due to cooking, cleaning products, and inadequate ventilation.\nMyth: Trees completely solve air pollution. Fact: Trees help at a city scale over decades, but they cannot clean severely polluted air fast enough to protect you today.\nMyth: Air pollution only affects your lungs. Fact: As covered above, it affects your heart, brain, eyes, and skin too.",
+    "quiz": [
+      { "q": "What percentage of PM2.5 does a cloth mask filter?", "options": ["80%", "50%", "10–20%", "95%"], "answer": 2 },
+      { "q": "How does indoor air quality compare to outdoor in poorly ventilated homes?", "options": ["Always cleaner", "About the same", "Can be 2–5x worse", "Impossible to measure"], "answer": 2 },
+      { "q": "Which gas is invisible and colorless but harmful?", "options": ["Smog", "NO2", "Dust", "PM10"], "answer": 1 }
+    ]
+  },
+  {
+    "id": "what-if-simulator",
+    "title": "What-If Simulator",
+    "icon": "Sliders",
+    "summary": "Change inputs and instantly see how your pollution exposure changes.",
+    "content": "simulator",
+    "quiz": []
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "hourly": [
+    { "time": "Now", "aqi": 199 },
+    { "time": "7 PM", "aqi": 210 },
+    { "time": "8 PM", "aqi": 225 },
+    { "time": "9 PM", "aqi": 240 },
+    { "time": "10 PM", "aqi": 220 },
+    { "time": "11 PM", "aqi": 180 },
+    { "time": "12 AM", "aqi": 160 },
+    { "time": "1 AM", "aqi": 150 },
+    { "time": "2 AM", "aqi": 140 },
+    { "time": "3 AM", "aqi": 145 },
+    { "time": "4 AM", "aqi": 155 },
+    { "time": "5 AM", "aqi": 160 }
+  ],
+  "best_hours": ["1 AM", "2 AM", "3 AM"],
+  "today_peak": 320,
+  "week_avg": 274,
+  "weather": "Clear skies expected in the afternoon. Wind speed: 12 km/h. UV Index: Moderate"
+}

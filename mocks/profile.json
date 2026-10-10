@@ -1,0 +1,13 @@
+{
+  "id": "mock-user-001",
+  "name": "Arjun Mehta",
+  "email": "arjun.mehta@example.com",
+  "phone": "+91 98765 43210",
+  "ward": "Anand Vihar, East Delhi",
+  "health_profile": "general",
+  "language": "en",
+  "points": 240,
+  "badges": ["First Report", "Drive Participant", "Air Guardian"],
+  "my_drives": ["dr-003", "dr-005"],
+  "reports_filed": 4
+}

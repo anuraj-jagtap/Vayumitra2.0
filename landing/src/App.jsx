@@ -1,7 +1,9 @@
-import { Link } from 'react-router-dom';
 import { Wind, Shield, Users, ArrowRight } from 'lucide-react';
 
-export default function Landing() {
+export default function App() {
+  const citizenUrl = import.meta.env.VITE_CITIZEN_APP_URL || '/';
+  const authorityUrl = import.meta.env.VITE_POLICYMAKER_APP_URL || '/';
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-50/50 to-white">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -22,8 +24,8 @@ export default function Landing() {
         </p>
 
         <div className="grid md:grid-cols-2 gap-6 w-full max-w-3xl">
-          <Link
-            to="/dashboard"
+          <a
+            href={citizenUrl}
             className="group relative bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center"
           >
             <div className="w-16 h-16 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
@@ -34,10 +36,10 @@ export default function Landing() {
             <div className="mt-auto flex items-center text-brand-600 font-medium">
               Enter Citizen Portal <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </div>
-          </Link>
+          </a>
 
           <a
-            href="#"
+            href={authorityUrl}
             className="group relative bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center"
           >
             <div className="w-16 h-16 bg-slate-50 text-slate-700 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
@@ -51,18 +53,27 @@ export default function Landing() {
           </a>
         </div>
 
-        <div className="mt-24 pt-12 border-t border-gray-100 w-full grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
-            <h3 className="text-4xl font-bold text-brand-600 mb-2">35+</h3>
-            <p className="text-gray-600">Monitoring Stations Active</p>
-          </div>
-          <div>
-            <h3 className="text-4xl font-bold text-brand-600 mb-2">10k+</h3>
-            <p className="text-gray-600">Community Reports</p>
-          </div>
-          <div>
-            <h3 className="text-4xl font-bold text-brand-600 mb-2">99%</h3>
-            <p className="text-gray-600">Data Reliability Rate</p>
+        <div className="mt-24 pt-12 border-t border-gray-100 w-full">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8">The Air Pollution Crisis</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+              <h3 className="text-4xl font-bold text-red-500 mb-2">99%</h3>
+              <p className="text-gray-900 font-medium mb-2">of the global population</p>
+              <p className="text-gray-500 text-sm">breathes air that exceeds WHO guideline limits.</p>
+              <p className="text-xs text-gray-400 mt-4">Source: World Health Organization (WHO)</p>
+            </div>
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+              <h3 className="text-4xl font-bold text-red-500 mb-2">7M</h3>
+              <p className="text-gray-900 font-medium mb-2">premature deaths</p>
+              <p className="text-gray-500 text-sm">annually linked to ambient and household air pollution.</p>
+              <p className="text-xs text-gray-400 mt-4">Source: WHO</p>
+            </div>
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+              <h3 className="text-4xl font-bold text-red-500 mb-2">35+</h3>
+              <p className="text-gray-900 font-medium mb-2">Monitoring Stations</p>
+              <p className="text-gray-500 text-sm">active in your city to track pollution levels in real time.</p>
+              <p className="text-xs text-gray-400 mt-4">Source: Central Pollution Control Board (CPCB)</p>
+            </div>
           </div>
         </div>
       </main>
