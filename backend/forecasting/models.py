@@ -94,8 +94,7 @@ class LatestRun(models.Model):
         db_table = 'latest_run'
 
 class VLatestHourly(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    station_id = models.CharField(max_length=50)
+    station_id = models.CharField(max_length=50, primary_key=True)
     station_name = models.CharField(max_length=255)
     locality = models.CharField(max_length=255)
     city = models.CharField(max_length=100)
@@ -117,8 +116,7 @@ class VLatestHourly(models.Model):
         db_table = 'v_latest_hourly'
 
 class VLatestDaily(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    station_id = models.CharField(max_length=50)
+    station_id = models.CharField(max_length=50, primary_key=True)
     station_name = models.CharField(max_length=255)
     locality = models.CharField(max_length=255)
     city = models.CharField(max_length=100)
