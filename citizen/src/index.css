@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@import "./tailwind-theme.css";
+
+@layer base {
+  body {
+    @apply bg-[#f8f9fc] text-slate-800 font-sans;
+  }
+}
