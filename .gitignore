@@ -1,0 +1,14 @@
+﻿node_modules/
+dist/
+build/
+.env
+.env.local
+__pycache__/
+venv/
+.venv/
+*.pyc
+.DS_Store
+.vscode/
+*.pkl
+*.h5
+data/raw/
