@@ -1,0 +1,11 @@
+{
+  "station_id": "DL_ANANDVIHAR",
+  "name": "Anand Vihar",
+  "distance_km": 2.3,
+  "aqi": 199,
+  "band": "Moderate",
+  "pm2_5": 85,
+  "pm10": 120,
+  "main_pollutant": "PM2.5",
+  "updated_at": "2026-10-10T14:00:00+05:30"
+}

@@ -9,9 +9,10 @@ function cn(...inputs) {
 
 export default function TopNav() {
   const location = useLocation();
+  const landingUrl = import.meta.env.VITE_LANDING_URL || 'http://localhost:5174';
 
   const navLinks = [
-    { name: 'My Air', path: '/dashboard', icon: Home },
+    { name: 'My Air', path: '/', icon: Home },
     { name: 'Learn', path: '/learn', icon: BookOpen },
     { name: 'Act', path: '/act', icon: Activity },
     { name: 'Drives', path: '/drives', icon: Users },
@@ -32,7 +33,7 @@ export default function TopNav() {
           <div className="hidden md:flex space-x-1">
             {navLinks.map((link) => {
               const Icon = link.icon;
-              const isActive = location.pathname === link.path;
+              const isActive = location.pathname === link.path || (link.path !== '/' && location.pathname.startsWith(link.path));
               return (
                 <Link
                   key={link.name}
@@ -52,18 +53,15 @@ export default function TopNav() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link to="/landing" className="text-sm font-medium text-gray-500 hover:text-gray-900 flex items-center gap-1">
+            <a href={landingUrl} className="text-sm font-medium text-gray-500 hover:text-gray-900 flex items-center gap-1">
               <ArrowLeft className="w-4 h-4" />
-              Landing
-            </Link>
+              Back to home
+            </a>
+            
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-semibold text-xs">
-                RK
-              </div>
-              <div className="hidden sm:block text-sm">
-                <p className="font-medium text-gray-900 leading-none">Rajesh Kumar</p>
-                <p className="text-gray-500 text-xs">Citizen</p>
-              </div>
+              <Link to="/profile" className="px-4 py-2 text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-xl transition-colors">
+                Sign in
+              </Link>
             </div>
           </div>
         </div>
