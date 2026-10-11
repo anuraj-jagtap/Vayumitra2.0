@@ -71,8 +71,11 @@ export function StatCard({ icon: Icon, label, value, unit, delta, deltaLabel, lo
         {unit && <span className="text-sm text-slate-400">{unit}</span>}
       </div>
       {delta !== undefined && (
-        <div className={`text-xs flex items-center gap-1 ${delta > 0 ? 'text-red-500' : delta < 0 ? 'text-green-600' : 'text-slate-400'}`}>
-          {delta > 0 ? '↑' : delta < 0 ? '↓' : '→'} {Math.abs(delta)}{deltaLabel && ` ${deltaLabel}`}
+        <div className={`text-xs flex items-center gap-1 ${typeof delta === 'number' && delta > 0 ? 'text-red-500' : typeof delta === 'number' && delta < 0 ? 'text-green-600' : 'text-slate-500'}`}>
+          {typeof delta === 'number'
+            ? `${delta > 0 ? '↑' : delta < 0 ? '↓' : '→'} ${Math.abs(delta)}`
+            : delta}
+          {deltaLabel && ` ${deltaLabel}`}
         </div>
       )}
     </div>

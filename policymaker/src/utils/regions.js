@@ -13,29 +13,29 @@ export const REGIONS = [
 export const REGION_KEYWORDS = {
   'North Delhi': [
     'north campus', 'jahangirpuri', 'wazirpur', 'rohini', 'satyawati',
-    'burari', 'narela', 'alipur', 'bawana', 'ashok vihar', 'model town'
+    'burari', 'narela', 'alipur', 'bawana', 'ashok vihar', 'model town', 'tool engineering'
   ],
   'South Delhi': [
     'r.k. puram', 'rk puram', 'okhla', 'lodhi road', 'jawaharlal nehru stadium',
     'nehru stadium', 'saket', 'siri fort', 'nehru nagar', 'aya nagar', 'karni singh',
-    'crri mathura road', 'us embassy', 'mandir marg'
+    'crri mathura road', 'us embassy', 'mandir marg', 'sriniwaspuri', 'pgdav', 'dhyan chand', 'national stadium'
   ],
   'East Delhi': [
     'anand vihar', 'patparganj', 'parparganj', 'mother dairy', 'vivek vihar',
-    'mayur vihar', 'shahdara', 'geeta colony', 'dilshad garden', 'sonia vihar'
+    'mayur vihar', 'shahdara', 'geeta colony', 'dilshad garden', 'sonia vihar', 'jhilmil'
   ],
   'West Delhi': [
     'shadipur', 'punjabi bagh', 'dwarka', 'janakpuri', 'mundka', 'pusa',
-    'paschim vihar', 'najafgarh', 'rajouri garden'
+    'paschim vihar', 'najafgarh', 'rajouri garden', 'bramprakash', 'najafgarh'
   ],
   'Noida': [
-    'noida', 'sector-1', 'sector-62', 'sector-125', 'greater noida'
+    'noida', 'sector - 125', 'sector-1', 'sector - 62', 'sector-116', 'greater noida', 'knowledge park'
   ],
   'Gurgaon': [
-    'gurgaon', 'gurugram', 'sector-51', 'vikas sadan', 'gwal pahari'
+    'gurgaon', 'gurugram', 'sector-51', 'vikas sadan', 'gwal pahari', 'teri gram'
   ],
   'Faridabad': [
-    'faridabad', 'sector 16a', 'sector 11', 'new industrial town'
+    'faridabad', 'sector 16a', 'sector 11', 'sector 30', 'new industrial town', 'ballabgarh', 'nathu colony'
   ]
 }
 
