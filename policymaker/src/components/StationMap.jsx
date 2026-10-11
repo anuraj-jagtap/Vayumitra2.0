@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import { getAQIBand } from '../utils/aqi'
 
 // StationMap: Leaflet map with AQI-colored pins
@@ -8,37 +10,51 @@ export default function StationMap({ stations = [], selectedStation, onSelect })
   const markersRef = useRef([])
 
   useEffect(() => {
-    if (instanceRef.current) return
-    // Dynamic import to avoid SSR issues
-    import('leaflet').then(L => {
-      const map = L.map(mapRef.current, {
-        center: [28.6139, 77.209],
-        zoom: 11,
-        zoomControl: true,
-      })
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap © CartoDB',
-        subdomains: 'abcd',
-        maxZoom: 19,
-      }).addTo(map)
-      instanceRef.current = { map, L }
+    if (!mapRef.current) return
+
+    // Clean up previous instance if still attached (e.g., StrictMode remount)
+    if (instanceRef.current) {
+      instanceRef.current.remove()
+      instanceRef.current = null
+    }
+
+    const map = L.map(mapRef.current, {
+      center: [28.6139, 77.209],
+      zoom: 11,
+      zoomControl: true,
     })
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19,
+    }).addTo(map)
+
+    instanceRef.current = map
+
+    // Ensure tiles render correctly even if container sized dynamically
+    setTimeout(() => {
+      map.invalidateSize()
+    }, 150)
+
     return () => {
-      if (instanceRef.current) {
-        instanceRef.current.map.remove()
-        instanceRef.current = null
-      }
+      map.remove()
+      instanceRef.current = null
     }
   }, [])
 
   useEffect(() => {
-    if (!instanceRef.current) return
-    const { map, L } = instanceRef.current
+    const map = instanceRef.current
+    if (!map) return
+
     // Remove old markers
     markersRef.current.forEach(m => m.remove())
     markersRef.current = []
 
     stations.forEach(s => {
+      if (s.lat == null || (s.lon == null && s.lng == null)) return
+      const lat = s.lat
+      const lon = s.lon != null ? s.lon : s.lng
+
       const band = getAQIBand(s.aqi)
       const iconHtml = `
         <div style="
@@ -48,16 +64,16 @@ export default function StationMap({ stations = [], selectedStation, onSelect })
           color:white;font-weight:700;font-size:11px;
           border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.25);
           font-feature-settings:'tnum' 1;
-        ">${s.aqi}</div>
+        ">${s.aqi ?? '—'}</div>
       `
       const icon = L.divIcon({ html: iconHtml, className: '', iconSize: [36, 36], iconAnchor: [18, 18] })
-      const marker = L.marker([s.lat, s.lon], { icon })
+      const marker = L.marker([lat, lon], { icon })
         .addTo(map)
         .bindPopup(`
           <div style="font-family:Inter,sans-serif;min-width:160px">
-            <div style="font-weight:700;font-size:14px;color:#0F172A;margin-bottom:4px">${s.name}</div>
+            <div style="font-weight:700;font-size:14px;color:#0F172A;margin-bottom:4px">${s.name || s.station_name || 'Station'}</div>
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-              <span style="font-size:24px;font-weight:800;color:${band.color};font-feature-settings:'tnum' 1">${s.aqi}</span>
+              <span style="font-size:24px;font-weight:800;color:${band.color};font-feature-settings:'tnum' 1">${s.aqi ?? '—'}</span>
               <span style="background:${band.bg};color:${band.text};padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600">${band.label}</span>
             </div>
             <div style="font-size:12px;color:#64748B">
@@ -71,6 +87,7 @@ export default function StationMap({ stations = [], selectedStation, onSelect })
   }, [stations])
 
   return (
-    <div ref={mapRef} className="w-full rounded-xl" style={{ height: '420px', zIndex: 1 }} />
+    <div ref={mapRef} className="w-full rounded-xl relative" style={{ height: '420px', minHeight: '420px', zIndex: 1 }} />
   )
 }
+

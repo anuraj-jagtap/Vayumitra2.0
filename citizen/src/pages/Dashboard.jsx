@@ -3,6 +3,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsToolti
 import { MapPin, Clock, Calendar, TrendingUp, AlertTriangle, CloudRain, Wind, Activity, Info, AlertCircle, RefreshCw } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { getAqiBand } from '../utils/aqiBand';
 import { fetchApi } from '../api/client';
 import { ADVICE } from '../data/advice';
@@ -18,10 +19,16 @@ L.Icon.Default.mergeOptions({
 function MapUpdater({ center }) {
   const map = useMap();
   useEffect(() => {
-    if (center) map.flyTo(center, 12);
+    if (center && center[0] && center[1]) {
+      map.flyTo(center, 12);
+    }
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 150);
   }, [center, map]);
   return null;
 }
+
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -234,9 +241,13 @@ export default function Dashboard() {
             <div className="text-right mt-3 text-[10px] text-gray-400">Sources: CPCB, WHO</div>
           </div>
 
-          <div className="bg-white rounded-3xl p-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 flex-1 min-h-[300px] overflow-hidden relative z-0">
-             <MapContainer center={mapCenter} zoom={12} className="w-full h-full rounded-[20px]" zoomControl={false}>
-              <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
+          <div className="bg-white rounded-3xl p-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 flex-1 min-h-[350px] h-[350px] overflow-hidden relative z-0">
+             <MapContainer center={mapCenter} zoom={12} style={{ height: '100%', minHeight: '340px', width: '100%' }} className="rounded-[20px]" zoomControl={false}>
+
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
               <MapUpdater center={mapCenter} />
               {stations.map(station => (
                 <Marker key={station.station_id} position={[station.lat, station.lng]}>

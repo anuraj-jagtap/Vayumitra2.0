@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
 import {
   CheckCircle2,
   Circle,
@@ -685,12 +687,14 @@ function ReportSection({ preCategory }) {
             <MapContainer
               center={mapCenter}
               zoom={13}
-              className="w-full h-full min-h-[420px] rounded-[20px]"
+              style={{ height: '420px', width: '100%', minHeight: '420px' }}
+              className="rounded-[20px]"
               zoomControl={false}
+
             >
               <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               />
               <MapClickHandler
                 onMapClick={(latlng) => {
