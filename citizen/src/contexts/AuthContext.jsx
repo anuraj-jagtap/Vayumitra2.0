@@ -2,8 +2,8 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 
 const AuthContext = createContext(null);
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-const LANDING_URL = import.meta.env.VITE_LANDING_URL || 'http://localhost:5173';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' && window.location.hostname ? `http://${window.location.hostname}:8000` : 'http://localhost:8000');
+const LANDING_URL = import.meta.env.VITE_LANDING_URL || (typeof window !== 'undefined' && window.location.hostname ? `http://${window.location.hostname}:5173` : 'http://localhost:5173');
 
 const MOCK_USER = {
   id: 'mock-user-001',
