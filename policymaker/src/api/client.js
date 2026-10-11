@@ -31,7 +31,8 @@ client.interceptors.response.use(
       } catch {
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
-        window.location.href = '/login'
+        const landingUrl = import.meta.env.VITE_LANDING_URL || 'http://localhost:5173'
+        window.location.href = `${landingUrl}/login`
       }
     }
     return Promise.reject(error)

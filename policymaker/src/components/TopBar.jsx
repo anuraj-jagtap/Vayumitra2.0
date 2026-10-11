@@ -26,10 +26,12 @@ export default function TopBar({ currentPage, region, onRegionChange }) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  const LANDING_URL = import.meta.env.VITE_LANDING_URL || 'http://localhost:5173'
+
   const handleLogout = () => {
     logout()
     setUserMenuOpen(false)
-    navigate('/login')
+    window.location.href = `${LANDING_URL}/login`
   }
 
   const displayName = user
@@ -148,7 +150,7 @@ export default function TopBar({ currentPage, region, onRegionChange }) {
                 </button>
               ) : (
                 <button
-                  onClick={() => { setUserMenuOpen(false); navigate('/login'); }}
+                  onClick={() => { setUserMenuOpen(false); window.location.href = `${LANDING_URL}/login`; }}
                   className="w-full text-left px-3 py-2 rounded-lg text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 flex items-center gap-2 transition-colors font-medium cursor-pointer"
                 >
                   <User className="w-3.5 h-3.5" />

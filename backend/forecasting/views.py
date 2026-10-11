@@ -11,7 +11,9 @@ class HourlyForecastListAPIView(generics.ListAPIView):
 
         city = self.request.query_params.get('city', None)
         if city:
-            queryset = queryset.filter(city__icontains=city)
+            c = city.strip().lower()
+            if c not in ['delhi ncr', 'ncr', 'all']:
+                queryset = queryset.filter(city__icontains=c)
 
         station_id = self.request.query_params.get('station_id', None)
         if station_id:
@@ -35,7 +37,9 @@ class DailyForecastListAPIView(generics.ListAPIView):
 
         city = self.request.query_params.get('city', None)
         if city:
-            queryset = queryset.filter(city__icontains=city)
+            c = city.strip().lower()
+            if c not in ['delhi ncr', 'ncr', 'all']:
+                queryset = queryset.filter(city__icontains=c)
 
         station_id = self.request.query_params.get('station_id', None)
         if station_id:

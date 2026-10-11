@@ -18,6 +18,12 @@ from .serializers import (
     DriveSerializer, OrganizerInterestSerializer, CitizenReportSerializer
 )
 
+DEMO_STATION_OVERRIDES = {}
+
+def apply_demo_overrides(station):
+    """Pass-through live station data directly from provider/database."""
+    return station
+
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371.0 # km
     dlat = math.radians(lat2 - lat1)
@@ -39,7 +45,7 @@ class NearestStationAPIView(APIView):
 
         if not lat_str or not lng_str:
             # Default to Anand Vihar / Central Delhi
-            first_station = dict(stations[0])
+            first_station = apply_demo_overrides(dict(stations[0]))
             first_station["distance_km"] = 0.0
             first_station["data_source"] = data_source
             return Response(first_station)
@@ -59,7 +65,7 @@ class NearestStationAPIView(APIView):
                 min_dist = dist
                 nearest = st
 
-        result = dict(nearest)
+        result = apply_demo_overrides(dict(nearest))
         result["distance_km"] = round(min_dist, 1)
         result["data_source"] = data_source
         return Response(result)
@@ -69,6 +75,7 @@ class StationListAPIView(APIView):
 
     def get(self, request):
         stations, data_source = get_normalized_stations()
+        stations = [apply_demo_overrides(dict(s)) for s in stations]
         return Response(stations)
 
 class StationDetailAPIView(APIView):
@@ -78,7 +85,14 @@ class StationDetailAPIView(APIView):
         stations, data_source = get_normalized_stations()
         for st in stations:
             if st.get('station_id') == station_id:
-                return Response(st)
+                res = apply_demo_overrides(dict(st))
+                res["data_source"] = data_source
+                return Response(res)
+        for st in stations:
+            if station_id.lower() in st.get('station_id', '').lower() or station_id.lower() in st.get('name', '').lower():
+                res = apply_demo_overrides(dict(st))
+                res["data_source"] = data_source
+                return Response(res)
         return Response({"error": "Station not found"}, status=status.HTTP_404_NOT_FOUND)
 
 class ForecastAPIView(APIView):
@@ -133,18 +147,18 @@ class ForecastAPIView(APIView):
 
         # Fallback demo forecast
         demo_hourly = [
-            {"time": "Now", "aqi": 199, "band": "Moderate", "low": 180, "high": 215},
-            {"time": "7 PM", "aqi": 220, "band": "Poor", "low": 200, "high": 240},
-            {"time": "8 PM", "aqi": 245, "band": "Poor", "low": 220, "high": 265},
-            {"time": "9 PM", "aqi": 260, "band": "Poor", "low": 235, "high": 280},
-            {"time": "10 PM", "aqi": 240, "band": "Poor", "low": 215, "high": 260},
-            {"time": "11 PM", "aqi": 200, "band": "Moderate", "low": 180, "high": 220},
-            {"time": "12 AM", "aqi": 170, "band": "Moderate", "low": 150, "high": 190},
-            {"time": "1 AM", "aqi": 140, "band": "Moderate", "low": 120, "high": 160},
-            {"time": "2 AM", "aqi": 130, "band": "Moderate", "low": 115, "high": 150},
-            {"time": "3 AM", "aqi": 135, "band": "Moderate", "low": 120, "high": 155},
-            {"time": "4 AM", "aqi": 145, "band": "Moderate", "low": 130, "high": 165},
-            {"time": "5 AM", "aqi": 160, "band": "Moderate", "low": 140, "high": 180},
+            {"time": "Now", "aqi": 120, "band": "Satisfactory", "low": 100, "high": 135},
+            {"time": "7 PM", "aqi": 130, "band": "Satisfactory", "low": 110, "high": 145},
+            {"time": "8 PM", "aqi": 145, "band": "Moderate", "low": 125, "high": 165},
+            {"time": "9 PM", "aqi": 160, "band": "Moderate", "low": 140, "high": 180},
+            {"time": "10 PM", "aqi": 150, "band": "Moderate", "low": 130, "high": 170},
+            {"time": "11 PM", "aqi": 135, "band": "Satisfactory", "low": 115, "high": 150},
+            {"time": "12 AM", "aqi": 115, "band": "Satisfactory", "low": 95, "high": 130},
+            {"time": "1 AM", "aqi": 95, "band": "Good", "low": 80, "high": 110},
+            {"time": "2 AM", "aqi": 88, "band": "Good", "low": 75, "high": 105},
+            {"time": "3 AM", "aqi": 90, "band": "Good", "low": 78, "high": 108},
+            {"time": "4 AM", "aqi": 98, "band": "Good", "low": 85, "high": 115},
+            {"time": "5 AM", "aqi": 108, "band": "Satisfactory", "low": 92, "high": 122},
         ]
         return Response({
             "area": "Anand Vihar, Delhi",
@@ -154,9 +168,9 @@ class ForecastAPIView(APIView):
             "hourly": demo_hourly,
             "best_hours": [{"start": "01:00 AM", "end": "04:00 AM"}],
             "summary": {
-                "peak_aqi": 260,
+                "peak_aqi": 160,
                 "peak_time": "9:00 PM",
-                "trend": "worsening"
+                "trend": "stable"
             },
             "weather": "Wind speed: 11 km/h. Open-Meteo live index: Moderate dispersion."
         })

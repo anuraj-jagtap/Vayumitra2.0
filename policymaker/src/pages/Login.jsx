@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Wind, Shield, Lock, Mail, AlertCircle, Loader2, ArrowRight } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
@@ -6,6 +6,11 @@ import { useAuth } from '../contexts/AuthContext'
 export default function Login() {
   const navigate = useNavigate()
   const { login } = useAuth()
+  const LANDING_URL = import.meta.env.VITE_LANDING_URL || 'http://localhost:5173'
+
+  useEffect(() => {
+    window.location.href = `${LANDING_URL}/login`
+  }, [LANDING_URL])
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
