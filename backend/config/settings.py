@@ -12,6 +12,9 @@ SECRET_KEY = env('SECRET_KEY', default='django-insecure-dummy-key-for-now')
 DEBUG = env.bool('DEBUG', default=True)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
 
+TRAFFIC_API_KEY = env('TRAFFIC_API_KEY', default='')
+TRAFFIC_PROVIDER = env('TRAFFIC_PROVIDER', default='tomtom')
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

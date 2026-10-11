@@ -71,3 +71,9 @@ export function useTrends(params = {}) {
 export function useCurrentWeather(params = {}) {
   return useFetch('/api/v1/weather/current/', params, [JSON.stringify(params)])
 }
+
+// Live Traffic & Urban Impact  →  GET /api/v1/traffic/
+export function useLiveTraffic(params = {}) {
+  return useFetch('/api/v1/traffic/', params, [JSON.stringify(params)])
+}
+
