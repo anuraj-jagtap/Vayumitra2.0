@@ -60,7 +60,7 @@ export default function Register() {
         }
         setError(messages.join(' | ') || 'An error occurred during registration.');
       } else {
-        setError('An error occurred during registration.');
+        setError(`Network error: ${err.message}. Is the backend running at ${API_URL}?`);
       }
     } finally {
       setLoading(false);
