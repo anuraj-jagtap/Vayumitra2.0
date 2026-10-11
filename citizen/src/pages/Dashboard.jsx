@@ -90,6 +90,23 @@ export default function Dashboard({ sourceLabel = "Nearest station" }) {
     }
   };
 
+  // Auto-refresh data feed every 15 minutes (or 900,000 ms) matching provider update frequency
+  useEffect(() => {
+    const REFRESH_INTERVAL_MS = 15 * 60 * 1000;
+    const interval = setInterval(() => {
+      if (selectedStationId) {
+        const chosen = stations.find((s) => s.station_id === selectedStationId);
+        if (chosen) {
+          loadData(chosen.lat, chosen.lng, selectedStationId);
+          return;
+        }
+      }
+      loadData(nearestStation?.lat || 28.6469, nearestStation?.lng || 77.3152, selectedStationId || null);
+    }, REFRESH_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, [selectedStationId, stations, nearestStation]);
+
   if (loading) {
     return (
       <div className="h-96 flex flex-col items-center justify-center text-brand-600">
@@ -197,8 +214,23 @@ export default function Dashboard({ sourceLabel = "Nearest station" }) {
                   {nearestStation.name}
                 </div>
                 <div className="text-xs text-gray-400 flex flex-col gap-1 mt-1.5">
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5" /> Updated: {new Date(nearestStation.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const chosen = stations.find(s => s.station_id === selectedStationId);
+                        if (chosen) {
+                          loadData(chosen.lat, chosen.lng, selectedStationId);
+                        } else {
+                          loadData(nearestStation?.lat || 28.6469, nearestStation?.lng || 77.3152, selectedStationId || null);
+                        }
+                      }}
+                      title="Refresh live monitoring data"
+                      className="ml-1 text-gray-400 hover:text-brand-600 transition-colors p-0.5 rounded"
+                    >
+                      <RefreshCw className="w-3 h-3 hover:rotate-180 transition-transform duration-300" />
+                    </button>
                   </span>
                   {isStale && (
                     <span className="text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded text-[11px] flex items-center gap-1 w-max mt-1">

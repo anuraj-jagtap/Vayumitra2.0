@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import BaseMap from '../components/BaseMap';
 import {
   Users,
   Calendar,
@@ -22,22 +24,34 @@ import {
 import { fetchApi } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 
-// Leaflet marker icon fix
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
-function MapFlyTo({ center }) {
-  const map = useMap();
-  useEffect(() => {
-    if (center) {
-      map.flyTo(center, 13, { duration: 1.2 });
-    }
-  }, [center, map]);
-  return null;
+function formatDriveDateTime(drive) {
+  if (drive.date && drive.time) {
+    return { date: drive.date, time: drive.time };
+  }
+  if (drive.starts_at) {
+    const start = new Date(drive.starts_at);
+    const end = drive.ends_at ? new Date(drive.ends_at) : null;
+    const dateStr = start.toLocaleDateString('en-IN', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    });
+    const startTimeStr = start.toLocaleTimeString('en-IN', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+    const endTimeStr = end
+      ? end.toLocaleTimeString('en-IN', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        })
+      : '';
+    const timeStr = endTimeStr ? `${startTimeStr} to ${endTimeStr}` : startTimeStr;
+    return { date: dateStr, time: timeStr };
+  }
+  return { date: 'Upcoming', time: 'Morning' };
 }
 
 export default function Drives() {
@@ -82,8 +96,8 @@ export default function Drives() {
       setError(null);
       try {
         const data = await fetchApi('/drives');
-        // Filter out pending drives; only show 'live'
-        const liveDrives = Array.isArray(data) ? data.filter((d) => d.status === 'live') : [];
+        // Filter out pending drives; only show verified / live
+        const liveDrives = Array.isArray(data) ? data.filter((d) => d.status === 'verified' || d.status === 'live') : [];
         setDrives(liveDrives);
       } catch (err) {
         console.error('Failed to load drives:', err);
@@ -99,7 +113,7 @@ export default function Drives() {
 
   const filteredDrives = drives.filter((drive) => {
     const matchesType = typeFilter === 'all' || drive.type === typeFilter;
-    const matchesDate = !dateFilter || drive.date === dateFilter;
+    const matchesDate = !dateFilter || drive.date === dateFilter || (drive.starts_at && drive.starts_at.startsWith(dateFilter));
     return matchesType && matchesDate;
   });
 
@@ -150,10 +164,11 @@ export default function Drives() {
   const activeWardBanner = drives.find((d) => d.ward_banner)?.ward_banner;
 
   const defaultCenter = [28.6139, 77.209];
-  const selectedCenter = selectedDrive
-    ? [selectedDrive.lat, selectedDrive.lng]
-    : activePinId
-    ? [drives.find((d) => d.id === activePinId)?.lat, drives.find((d) => d.id === activePinId)?.lng]
+  const activeDrive = drives.find((d) => d.id === activePinId);
+  const selectedCenter = selectedDrive && !isNaN(parseFloat(selectedDrive.lat))
+    ? [parseFloat(selectedDrive.lat), parseFloat(selectedDrive.lng)]
+    : activeDrive && !isNaN(parseFloat(activeDrive.lat))
+    ? [parseFloat(activeDrive.lat), parseFloat(activeDrive.lng)]
     : defaultCenter;
 
   return (
@@ -259,6 +274,9 @@ export default function Drives() {
             filteredDrives.map((drive) => {
               const isRsvped = rsvps.includes(drive.id);
               const isSelected = activePinId === drive.id;
+              const dt = formatDriveDateTime(drive);
+              const place = drive.place_name || drive.place || 'Delhi';
+              const isVerified = drive.verified || drive.verified_organizer;
 
               return (
                 <div
@@ -274,7 +292,7 @@ export default function Drives() {
                         <span className="text-xs font-semibold px-2.5 py-0.5 rounded-lg bg-brand-50 text-brand-700">
                           {drive.type}
                         </span>
-                        {drive.verified && (
+                        {isVerified && (
                           <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700">
                             <ShieldCheck className="w-3.5 h-3.5" /> Verified organizer
                           </span>
@@ -294,15 +312,15 @@ export default function Drives() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-600 py-3 border-y border-gray-50 my-3">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-brand-500 shrink-0" />
-                      <span>{drive.date}</span>
+                      <span>{dt.date}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-brand-500 shrink-0" />
-                      <span>{drive.time}</span>
+                      <span>{dt.time}</span>
                     </div>
                     <div className="flex items-center gap-2 sm:col-span-2">
                       <MapPin className="w-4 h-4 text-red-500 shrink-0" />
-                      <span className="truncate">{drive.place}</span>
+                      <span className="truncate">{place}</span>
                     </div>
                   </div>
 
@@ -332,42 +350,44 @@ export default function Drives() {
         </div>
 
         {/* Right column: Sticky Leaflet Map */}
-        <div className="lg:col-span-5 bg-white rounded-3xl p-3 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-[550px] lg:h-auto lg:sticky lg:top-24 overflow-hidden relative">
-          <MapContainer
-            center={defaultCenter}
-            zoom={11}
+        <div className="lg:col-span-5 bg-white rounded-3xl p-3 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-[550px] lg:h-[650px] min-h-[500px] lg:sticky lg:top-24 overflow-hidden relative">
+          <BaseMap
+            center={selectedCenter}
+            zoom={selectedDrive || activePinId ? 13 : 11}
             className="w-full h-full rounded-2xl z-0"
-            zoomControl={false}
           >
-            <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
-            <MapFlyTo center={selectedCenter} />
+            {filteredDrives.map((drive) => {
+              const lat = parseFloat(drive.lat);
+              const lng = parseFloat(drive.lng);
+              if (isNaN(lat) || isNaN(lng)) return null;
 
-            {filteredDrives.map((drive) => (
-              <Marker
-                key={drive.id}
-                position={[drive.lat, drive.lng]}
-                eventHandlers={{
-                  click: () => {
-                    setActivePinId(drive.id);
-                  },
-                }}
-              >
-                <Popup>
-                  <div className="p-1">
-                    <div className="font-bold text-sm text-gray-900">{drive.title}</div>
-                    <div className="text-xs text-brand-600 font-medium mt-0.5">{drive.type}</div>
-                    <div className="text-xs text-gray-500 mt-1">{drive.place}</div>
-                    <button
-                      onClick={() => setSelectedDrive(drive)}
-                      className="mt-2 text-xs font-bold text-white bg-brand-600 px-3 py-1 rounded-lg block w-full text-center"
-                    >
-                      View Details
-                    </button>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-          </MapContainer>
+              return (
+                <Marker
+                  key={drive.id}
+                  position={[lat, lng]}
+                  eventHandlers={{
+                    click: () => {
+                      setActivePinId(drive.id);
+                    },
+                  }}
+                >
+                  <Popup>
+                    <div className="p-1">
+                      <div className="font-bold text-sm text-gray-900">{drive.title}</div>
+                      <div className="text-xs text-brand-600 font-medium mt-0.5">{drive.type}</div>
+                      <div className="text-xs text-gray-500 mt-1">{drive.place_name || drive.place}</div>
+                      <button
+                        onClick={() => setSelectedDrive(drive)}
+                        className="mt-2 text-xs font-bold text-white bg-brand-600 px-3 py-1 rounded-lg block w-full text-center"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
+          </BaseMap>
         </div>
       </div>
 
@@ -401,15 +421,22 @@ export default function Drives() {
               <div className="bg-slate-50 rounded-2xl p-4 space-y-2">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-brand-600 shrink-0" />
-                  <span className="font-medium text-gray-800">{selectedDrive.date} at {selectedDrive.time}</span>
+                  <span className="font-medium text-gray-800">
+                    {formatDriveDateTime(selectedDrive).date} at {formatDriveDateTime(selectedDrive).time}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-red-500 shrink-0" />
-                  <span className="font-medium text-gray-800">{selectedDrive.place}</span>
+                  <span className="font-medium text-gray-800">{selectedDrive.place_name || selectedDrive.place}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Info className="w-4 h-4 text-brand-600 shrink-0" />
-                  <span><strong>What to bring:</strong> {selectedDrive.what_to_bring || 'Nothing required'}</span>
+                  <span>
+                    <strong>What to bring:</strong>{' '}
+                    {Array.isArray(selectedDrive.what_to_bring)
+                      ? selectedDrive.what_to_bring.join(', ')
+                      : (selectedDrive.what_to_bring || 'Nothing required')}
+                  </span>
                 </div>
               </div>
 

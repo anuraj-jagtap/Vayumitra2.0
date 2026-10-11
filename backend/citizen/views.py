@@ -251,7 +251,7 @@ class DriveReportAPIView(APIView):
         return Response({"status": "received", "message": "Drive report submitted for review."})
 
 class CitizenReportAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         lat = request.data.get('lat')
@@ -288,8 +288,9 @@ class CitizenReportAPIView(APIView):
             except Exception as e:
                 cleaned_photo = photo # Fallback
 
+        reporter = request.user if request.user.is_authenticated else None
         report = CitizenReport.objects.create(
-            reporter=request.user,
+            reporter=reporter,
             category=request.data.get('category', 'construction_dust'),
             note=request.data.get('note', '')[:500],
             lat=lat,

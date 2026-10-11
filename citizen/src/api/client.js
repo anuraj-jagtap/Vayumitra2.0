@@ -2,7 +2,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
 
 export async function fetchApi(endpoint, options = {}) {
-  let url = `${API_BASE}${endpoint}`;
+  let url;
   
   if (USE_MOCKS) {
     // Strip query params for mock file resolution
@@ -14,6 +14,10 @@ export async function fetchApi(endpoint, options = {}) {
       options.method = 'GET';
       delete options.body;
     }
+  } else {
+    // In live mode, route endpoints to citizen backend namespace
+    const apiPath = endpoint.startsWith('/api/') ? endpoint : `/api/citizen${endpoint}`;
+    url = `${API_BASE}${apiPath}`;
   }
 
   const token = localStorage.getItem('access_token') || localStorage.getItem('vayu_token');

@@ -6,16 +6,16 @@ from .base import BaseAQIProvider, compute_cpcb_band
 
 class AQICNProvider(BaseAQIProvider):
     def __init__(self, api_key: str = None):
-        self.api_key = api_key or os.getenv("AQI_API_KEY", "")
+        self.api_key = api_key or os.getenv("AQI_API_KEY") or os.getenv("WAQI_API_KEY", "")
         self.base_url = "https://api.waqi.info"
 
     def fetch_stations(self) -> List[Dict[str, Any]]:
         if not self.api_key:
-            raise ValueError("AQI_API_KEY is missing for AQICNProvider")
+            raise ValueError("AQI_API_KEY or WAQI_API_KEY is missing for AQICNProvider")
 
         # Query Delhi bounding box: lat 28.40,76.84 to 28.88,77.35
         url = f"{self.base_url}/map/bounds/?latlng=28.40,76.84,28.88,77.35&token={self.api_key}"
-        res = requests.get(url, timeout=5)
+        res = requests.get(url, timeout=12)
         res.raise_for_status()
         data = res.json()
 

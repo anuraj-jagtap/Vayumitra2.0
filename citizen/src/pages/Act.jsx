@@ -28,6 +28,7 @@ import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { fetchApi } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
+import { REGION_CONFIG } from '../config/region';
 
 // ─── Tailwind merge helper ────────────────────────────────────────────────────
 function cn(...inputs) {
@@ -311,7 +312,7 @@ function ChecklistSection({ onReportTabLink }) {
 
 // ─── Report Section ───────────────────────────────────────────────────────────
 function ReportSection({ preCategory }) {
-  const { user } = useAuth();
+  const { user, login, MOCK_USER } = useAuth();
 
   // Form state
   const [category, setCategory] = useState(preCategory || CATEGORIES[0]);
@@ -408,6 +409,11 @@ function ReportSection({ preCategory }) {
         return;
       }
 
+      if (!REGION_CONFIG.isWithinBounds(location.lat, location.lng)) {
+        setSubmitError('Reports can only be filed within Delhi bounds. Please adjust the pin inside Delhi.');
+        return;
+      }
+
       setSubmitting(true);
       setSubmitError(null);
 
@@ -459,9 +465,9 @@ function ReportSection({ preCategory }) {
         <div className="text-center max-w-md">
           <h3 className="text-2xl font-bold text-gray-900 mb-2">Report Received!</h3>
           <p className="text-gray-500 text-sm leading-relaxed">{success.message}</p>
-          {success.id && (
+          {(success.id || success.report_id) && (
             <p className="text-xs text-gray-400 mt-3 font-mono">
-              Ref: {success.id}
+              Ref: {success.id || success.report_id}
             </p>
           )}
         </div>
@@ -479,18 +485,35 @@ function ReportSection({ preCategory }) {
     <div className="space-y-6">
       {/* Auth banner */}
       {showAuthBanner && !user && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <p className="font-semibold text-amber-800 text-sm">Sign in to submit</p>
-            <p className="text-xs text-amber-600 mt-0.5">
-              You need to be signed in to file a pollution report. Your data helps authorities act
-              faster.
-            </p>
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-amber-800 text-sm">Sign in to submit report</p>
+              <p className="text-xs text-amber-600 mt-0.5">
+                You need to be signed in to file a pollution report so authorities can take action.
+              </p>
+            </div>
           </div>
-          <button onClick={() => setShowAuthBanner(false)}>
-            <X className="w-4 h-4 text-amber-400 hover:text-amber-600" />
-          </button>
+          <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                login(MOCK_USER, 'mock-token-xyz');
+                setShowAuthBanner(false);
+              }}
+              className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors"
+            >
+              Sign In as Citizen
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowAuthBanner(false)}
+              className="p-1 text-amber-400 hover:text-amber-600"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
 
