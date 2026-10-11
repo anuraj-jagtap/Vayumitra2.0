@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts'
-import { FlaskConical, RefreshCw, ChevronDown, CheckCircle2, TrendingDown, HeartPulse, ShieldAlert, Sparkles, Send } from 'lucide-react'
+import { FlaskConical, RefreshCw, ChevronDown, CheckCircle2, Send } from 'lucide-react'
 import { matchesRegion } from '../utils/regions'
 import { getAQIBand } from '../utils/aqi'
 import { useCurrentAQI } from '../api/hooks'
@@ -57,14 +57,6 @@ export default function PolicySimulator({ region = 'Delhi NCR' }) {
   const aqiDelta = baselineAQI - simulatedAQI
   const baselineBand = getAQIBand(baselineAQI)
   const simulatedBand = getAQIBand(simulatedAQI)
-
-  // 4. Quantified Health & Environmental Outcomes
-  const healthBenefits = useMemo(() => {
-    const avertedERVisits = Math.round((aqiDelta / 10) * 14 * (intensity / 100))
-    const pm25Saved = Math.round(aqiDelta * 0.65)
-    const populationProtected = selectedStationId === 'ALL' ? '28.5M NCR Residents' : '2.1M Local Residents'
-    return { avertedERVisits, pm25Saved, populationProtected }
-  }, [aqiDelta, intensity, selectedStationId])
 
   // 5. 14-day projection data based on dynamic baseline
   const chartData = useMemo(() => {
@@ -208,91 +200,80 @@ export default function PolicySimulator({ region = 'Delhi NCR' }) {
       </div>
 
       {/* Comparison Scorecards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Baseline Card */}
-        <div className="bg-white border border-slate-100 rounded-xl p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Live Baseline</span>
-            <span className="text-xs text-slate-400">CPCB Telemetry</span>
+        <div className="bg-white border border-slate-100 rounded-xl p-5 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Live Baseline</span>
+              <span className="text-xs text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-100 font-medium">
+                CPCB Telemetry
+              </span>
+            </div>
+            <div className="text-5xl font-extrabold tabular-nums" style={{ color: baselineBand.color }}>
+              {baselineAQI}
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: baselineBand.bg, color: baselineBand.text }}>
+                {baselineBand.label}
+              </span>
+              <span className="text-xs text-slate-500 truncate">
+                {selectedStationId === 'ALL' ? `${region} Average` : 'Selected Station'}
+              </span>
+            </div>
           </div>
-          <div className="text-5xl font-extrabold tabular-nums" style={{ color: baselineBand.color }}>
-            {baselineAQI}
-          </div>
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: baselineBand.bg, color: baselineBand.text }}>
-              {baselineBand.label}
-            </span>
-            <span className="text-xs text-slate-500 truncate">
-              {selectedStationId === 'ALL' ? `${region} Average` : 'Selected Station'}
-            </span>
+          <div className="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-400">
+            Real-time reference index before intervention modeling
           </div>
         </div>
 
         {/* Simulated Outcome Card */}
-        <div className="bg-white border border-slate-100 rounded-xl p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-[#2563EB] uppercase tracking-wider">Simulated Outcome</span>
-            <span className="text-xs text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded">
-              ↓ {reductionPct.toFixed(1)}% Reduction
-            </span>
-          </div>
-          <div className="text-5xl font-extrabold tabular-nums" style={{ color: simulatedBand.color }}>
-            {simulatedAQI}
-          </div>
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: simulatedBand.bg, color: simulatedBand.text }}>
-              {simulatedBand.label}
-            </span>
-            <span className="text-xs text-emerald-700 font-bold">
-              ↓ {aqiDelta} AQI Points Drop
-            </span>
-          </div>
-        </div>
-
-        {/* Quantified Health Benefits */}
-        <div className="bg-gradient-to-br from-[#1E293B] to-[#0F172A] text-white rounded-xl p-5 shadow-sm flex flex-col justify-between">
+        <div className="bg-white border border-slate-100 rounded-xl p-5 shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                <HeartPulse className="w-3.5 h-3.5 text-rose-400" /> Projected Impact
-              </span>
-              <span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2 py-0.5 rounded-full">
-                AI Evaluated
+              <span className="text-xs font-semibold text-[#2563EB] uppercase tracking-wider">Simulated Outcome</span>
+              <span className="text-xs text-emerald-600 font-semibold bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-100">
+                ↓ {reductionPct.toFixed(1)}% Reduction
               </span>
             </div>
-            <div className="space-y-2 mt-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-400">ER Visits Averted (Weekly):</span>
-                <span className="font-bold text-emerald-400">~{healthBenefits.avertedERVisits} Cases</span>
+            <div className="flex items-baseline gap-3">
+              <div className="text-5xl font-extrabold tabular-nums" style={{ color: simulatedBand.color }}>
+                {simulatedAQI}
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-400">Ambient PM2.5 Reduced:</span>
-                <span className="font-bold text-cyan-400">~{healthBenefits.pm25Saved} µg/m³</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-400">Beneficiary Scope:</span>
-                <span className="font-medium text-slate-300">{healthBenefits.populationProtected}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: simulatedBand.bg, color: simulatedBand.text }}>
+                  {simulatedBand.label}
+                </span>
+                <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                  ↓ {aqiDelta} AQI Points Drop
+                </span>
               </div>
             </div>
           </div>
-          <button
-            onClick={handleSubmitSimulation}
-            className={`w-full mt-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
-              submitted
-                ? 'bg-emerald-600 text-white'
-                : 'bg-[#2563EB] hover:bg-blue-600 text-white active:scale-95'
-            }`}
-          >
-            {submitted ? (
-              <>
-                <CheckCircle2 className="w-3.5 h-3.5" /> Simulation Forwarded to CAQM!
-              </>
-            ) : (
-              <>
-                <Send className="w-3.5 h-3.5" /> Submit Simulation Brief
-              </>
-            )}
-          </button>
+
+          <div className="mt-4 pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <span className="text-xs text-slate-400">
+              Reflects {intensity}% enforcement compliance
+            </span>
+            <button
+              onClick={handleSubmitSimulation}
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                submitted
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-[#2563EB] hover:bg-blue-600 text-white active:scale-95 shadow-sm'
+              }`}
+            >
+              {submitted ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Simulation Brief Forwarded to CAQM!
+                </>
+              ) : (
+                <>
+                  <Send className="w-3.5 h-3.5" /> Submit Simulation Brief
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
