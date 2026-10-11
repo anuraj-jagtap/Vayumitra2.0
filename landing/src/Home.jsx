@@ -2,7 +2,7 @@ import { Wind, Shield, Users, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Home() {
-  const citizenUrl = import.meta.env.VITE_CITIZEN_APP_URL || 'http://localhost:5174';
+  const citizenUrl = import.meta.env.VITE_CITIZEN_APP_URL || (typeof window !== 'undefined' && window.location.hostname ? `http://${window.location.hostname}:5174` : 'http://localhost:5174');
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-50/50 to-white">
