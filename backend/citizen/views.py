@@ -8,9 +8,18 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from PIL import Image
 import io
 from django.core.files.uploadedfile import InMemoryUploadedFile
+
+class SafeJWTAuthentication(JWTAuthentication):
+    """Safely authenticates JWT if valid, but falls back gracefully for invalid/mock tokens on AllowAny endpoints."""
+    def authenticate(self, request):
+        try:
+            return super().authenticate(request)
+        except Exception:
+            return None
 
 from .providers import get_normalized_stations, compute_cpcb_band
 from .models import Drive, Rsvp, Checkin, OrganizerInterest, CitizenReport, DriveReport, CitizenProfile
@@ -265,6 +274,7 @@ class DriveReportAPIView(APIView):
         return Response({"status": "received", "message": "Drive report submitted for review."})
 
 class CitizenReportAPIView(APIView):
+    authentication_classes = [SafeJWTAuthentication]
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -302,10 +312,20 @@ class CitizenReportAPIView(APIView):
             except Exception as e:
                 cleaned_photo = photo # Fallback
 
+        raw_cat = request.data.get('category', 'construction_dust')
+        cat_map = {
+            'construction dust': 'construction_dust',
+            'garbage/biomass burning': 'garbage_burning',
+            'industrial smoke': 'industrial_smoke',
+            'traffic jam': 'traffic_jam',
+            'vehicle idling': 'vehicle_idling',
+        }
+        category = cat_map.get(str(raw_cat).lower().strip(), raw_cat)
+
         reporter = request.user if request.user.is_authenticated else None
         report = CitizenReport.objects.create(
             reporter=reporter,
-            category=request.data.get('category', 'construction_dust'),
+            category=category,
             note=request.data.get('note', '')[:500],
             lat=lat,
             lng=lng,

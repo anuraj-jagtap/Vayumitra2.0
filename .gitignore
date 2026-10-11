@@ -1,4 +1,4 @@
-﻿node_modules/
+node_modules/
 dist/
 build/
 .env
@@ -12,3 +12,5 @@ venv/
 *.pkl
 *.h5
 data/raw/
+citizen_reports/
+backend/citizen_reports/

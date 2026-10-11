@@ -418,17 +418,29 @@ function ReportSection({ preCategory }) {
       setSubmitError(null);
 
       try {
-        const payload = {
-          category,
-          lat: location.lat,
-          lng: location.lng,
-          note: note.trim() || null,
-          // photo is omitted from JSON; in a real app use FormData
-        };
+        let body;
+        if (photo?.file) {
+          const fd = new FormData();
+          fd.append('category', category);
+          fd.append('lat', location.lat);
+          fd.append('lng', location.lng);
+          if (note && note.trim()) {
+            fd.append('note', note.trim());
+          }
+          fd.append('photo', photo.file);
+          body = fd;
+        } else {
+          body = JSON.stringify({
+            category,
+            lat: location.lat,
+            lng: location.lng,
+            note: note.trim() || null,
+          });
+        }
 
         const result = await fetchApi('/reports', {
           method: 'POST',
-          body: JSON.stringify(payload),
+          body,
         });
 
         localStorage.setItem(LS_LAST_REPORT_KEY, String(Date.now()));
@@ -439,7 +451,7 @@ function ReportSection({ preCategory }) {
         setSubmitting(false);
       }
     },
-    [user, throttleLeft, location, category, note],
+    [user, throttleLeft, location, category, note, photo],
   );
 
   const resetForm = () => {
