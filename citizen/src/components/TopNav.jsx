@@ -1,7 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Wind, Home, BookOpen, Activity, Users, User, ArrowLeft } from 'lucide-react';
+import { Wind, Home, BookOpen, Activity, Users, User, ArrowLeft, LogOut } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useAuth } from '../contexts/AuthContext';
 
 function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -9,7 +10,8 @@ function cn(...inputs) {
 
 export default function TopNav() {
   const location = useLocation();
-  const landingUrl = import.meta.env.VITE_LANDING_URL || 'http://localhost:5174';
+  const { user, logout } = useAuth();
+  const landingUrl = import.meta.env.VITE_LANDING_URL || 'http://localhost:5173';
 
   const navLinks = [
     { name: 'My Air', path: '/', icon: Home },
@@ -58,14 +60,39 @@ export default function TopNav() {
               Back to home
             </a>
             
-            <div className="flex items-center gap-2">
-              <Link to="/profile" className="px-4 py-2 text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-xl transition-colors">
-                Sign in
-              </Link>
-            </div>
+            {user ? (
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/profile"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-brand-50 text-brand-700 hover:bg-brand-100 transition-colors text-sm font-medium"
+                >
+                  <div className="w-6 h-6 rounded-lg bg-brand-600 text-white flex items-center justify-center text-xs font-bold">
+                    {(user.name || user.username || 'U')[0]?.toUpperCase()}
+                  </div>
+                  <span className="hidden sm:inline max-w-[120px] truncate">{user.name || user.username}</span>
+                </Link>
+                <button
+                  onClick={logout}
+                  title="Sign out"
+                  className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <a
+                  href={`${landingUrl}/login`}
+                  className="px-4 py-2 text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-xl transition-colors"
+                >
+                  Sign in
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </nav>
   );
 }
+

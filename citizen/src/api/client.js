@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
 
 export async function fetchApi(endpoint, options = {}) {
@@ -16,10 +16,14 @@ export async function fetchApi(endpoint, options = {}) {
     }
   }
 
+  const token = localStorage.getItem('access_token') || localStorage.getItem('vayu_token');
+  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+
   const response = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...authHeader,
       ...options.headers,
     },
   });
@@ -30,3 +34,4 @@ export async function fetchApi(endpoint, options = {}) {
 
   return response.json();
 }
+
