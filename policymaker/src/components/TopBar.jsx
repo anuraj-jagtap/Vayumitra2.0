@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Bell, User, ChevronDown, LogOut, ShieldAlert, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { REGIONS } from '../utils/regions'
 
 export default function TopBar({ currentPage, region, onRegionChange }) {
+  const navigate = useNavigate()
   const { user, logout } = useAuth()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
@@ -26,12 +28,14 @@ export default function TopBar({ currentPage, region, onRegionChange }) {
 
   const handleLogout = () => {
     logout()
-    window.location.href = 'http://localhost:5173/'
+    setUserMenuOpen(false)
+    navigate('/login')
   }
 
   const displayName = user
     ? (user.first_name ? `${user.first_name} ${user.last_name || ''}`.trim() : user.username)
-    : 'Policymaker'
+    : 'Policymaker (Guest)'
+
 
   const deptName = user?.department || user?.organization || 'DPCC Central Admin'
 
@@ -128,19 +132,29 @@ export default function TopBar({ currentPage, region, onRegionChange }) {
           <div className="absolute right-0 mt-2 w-56 bg-[#0F172A] border border-[#1E3A5F] rounded-xl shadow-xl py-2 z-50 text-xs text-slate-300">
             <div className="px-4 py-2 border-b border-slate-800">
               <div className="font-semibold text-white text-sm">{displayName}</div>
-              <div className="text-slate-400 truncate">{user?.email || 'admin@dpcc.delhi.gov.in'}</div>
+              <div className="text-slate-400 truncate">{user?.email || (user ? 'admin@dpcc.delhi.gov.in' : 'Guest Viewer')}</div>
               <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-900/40 text-blue-400 border border-blue-800/40">
-                {user?.role || 'POLICYMAKER'}
+                {user?.role || (user ? 'POLICYMAKER' : 'GUEST SESSION')}
               </span>
             </div>
             <div className="px-2 pt-1">
-              <button
-                onClick={handleLogout}
-                className="w-full text-left px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 flex items-center gap-2 transition-colors font-medium"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                Sign Out
-              </button>
+              {user ? (
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 flex items-center gap-2 transition-colors font-medium cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  Sign Out
+                </button>
+              ) : (
+                <button
+                  onClick={() => { setUserMenuOpen(false); navigate('/login'); }}
+                  className="w-full text-left px-3 py-2 rounded-lg text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 flex items-center gap-2 transition-colors font-medium cursor-pointer"
+                >
+                  <User className="w-3.5 h-3.5" />
+                  Sign In
+                </button>
+              )}
             </div>
           </div>
         )}

@@ -10,6 +10,8 @@ import ForecastWarnings from './pages/ForecastWarnings'
 import PolicySimulator from './pages/PolicySimulator'
 import TrafficUrban from './pages/TrafficUrban'
 import Reports from './pages/Reports'
+import Login from './pages/Login'
+
 
 const PAGE_TITLES = {
   '/':          'City Overview',
@@ -106,6 +108,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/login" element={<Login />} />
           <Route
             path="/*"
             element={
@@ -121,3 +124,4 @@ export default function App() {
     </AuthProvider>
   )
 }
+
