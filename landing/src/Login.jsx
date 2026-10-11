@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Wind, AlertCircle, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const API_URL = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' && window.location.hostname ? `http://${window.location.hostname}:8000` : 'http://localhost:8000');
+const API_URL = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' && window.location ? (window.location.protocol === 'https:' ? window.location.origin : (window.location.hostname ? `http://${window.location.hostname}:8000` : 'http://localhost:8000')) : 'http://localhost:8000');
 const CITIZEN_URL = import.meta.env.VITE_CITIZEN_APP_URL || (typeof window !== 'undefined' && window.location.hostname ? `http://${window.location.hostname}:5174` : 'http://localhost:5174');
 const POLICYMAKER_URL = import.meta.env.VITE_POLICYMAKER_APP_URL || (typeof window !== 'undefined' && window.location.hostname ? `http://${window.location.hostname}:5175` : 'http://localhost:5175');
 

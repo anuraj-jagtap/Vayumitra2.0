@@ -119,8 +119,8 @@ export default function Dashboard({ sourceLabel = "Nearest station" }) {
       let liveStations = [];
       try {
         const [aqiRes, stRes] = await Promise.all([
-          fetch('http://localhost:8000/api/v1/aqi/current/?city=Delhi+NCR').then(r => r.ok ? r.json() : null).catch(() => null),
-          fetch('http://localhost:8000/api/v1/stations/?city=Delhi+NCR').then(r => r.ok ? r.json() : null).catch(() => null)
+          fetchApi('/api/v1/aqi/current/?city=Delhi+NCR').catch(() => null),
+          fetchApi('/api/v1/stations/?city=Delhi+NCR').catch(() => null)
         ]);
 
         const aqiList = aqiRes?.results || (Array.isArray(aqiRes) ? aqiRes : []);
