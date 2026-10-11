@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import client from './client'
 
-function useFetch(url, params = {}, deps = []) {
+function useFetch(url, params = {}, deps = [], intervalMs = 60000) {
   const [data, setData]       = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState(null)
@@ -10,11 +10,26 @@ function useFetch(url, params = {}, deps = []) {
     let cancelled = false
     setLoading(true)
     setError(null)
-    client.get(url, { params })
-      .then(res => { if (!cancelled) setData(res.data) })
-      .catch(err => { if (!cancelled) setError(err?.response?.data || err.message) })
-      .finally(() => { if (!cancelled) setLoading(false) })
-    return () => { cancelled = true }
+
+    const fetchData = () => {
+      if (!url) return
+      client.get(url, { params })
+        .then(res => { if (!cancelled) setData(res.data) })
+        .catch(err => { if (!cancelled) setError(err?.response?.data || err.message) })
+        .finally(() => { if (!cancelled) setLoading(false) })
+    }
+
+    fetchData()
+
+    let timer = null
+    if (intervalMs > 0) {
+      timer = setInterval(fetchData, intervalMs)
+    }
+
+    return () => {
+      cancelled = true
+      if (timer) clearInterval(timer)
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)
 
@@ -50,4 +65,9 @@ export function useTrends(params = {}) {
     [JSON.stringify(params)]
   )
   return { data, loading: enabled ? loading : false, error }
+}
+
+// Current Weather  →  GET /api/v1/weather/current/
+export function useCurrentWeather(params = {}) {
+  return useFetch('/api/v1/weather/current/', params, [JSON.stringify(params)])
 }

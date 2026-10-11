@@ -32,8 +32,9 @@ export function AuthProvider({ children }) {
         setLoading(false)
       })
       .catch((err) => {
-        console.error("Auth me error", err);
-        document.body.innerHTML = `<div style="padding: 20px; color: red; font-family: sans-serif;"><h1>Auth Error</h1><pre>${err.message}</pre><pre>${JSON.stringify(err.response?.data || 'No response data')}</pre><pre>${err.stack}</pre></div>`;
+        console.warn("Auth me error or unauthenticated session:", err?.message);
+        setUser(null)
+        setLoading(false)
       })
   }, [])
 

@@ -37,7 +37,7 @@ class Command(BaseCommand):
     help = "Sync live stations, air quality readings (WAQI), and weather observations (OpenWeather) into AWS RDS"
 
     def add_arguments(self, parser):
-        parser.add_argument('--limit', type=int, default=25, help='Max stations to fetch detailed readings for')
+        parser.add_argument('--limit', type=int, default=100, help='Max stations to fetch detailed readings for')
         parser.add_argument('--dry-run', action='store_true', help='Test API calls without writing to database')
 
     def handle(self, *args, **options):
@@ -63,124 +63,158 @@ class Command(BaseCommand):
         # 1. FETCH STATIONS & AIR QUALITY VIA WAQI
         # -------------------------------------------------------------
         if waqi_key:
-            self.stdout.write("--> Connecting to WAQI API...")
-            try:
-                search_url = f"https://api.waqi.info/search/?keyword=delhi&token={waqi_key}"
-                req = urllib.request.Request(search_url, headers={'User-Agent': 'Vayumitra/2.0'})
-                with urllib.request.urlopen(req, timeout=15) as resp:
-                    search_data = json.loads(resp.read().decode('utf-8'))
+            self.stdout.write("--> Connecting to WAQI API for all Delhi NCR regions...")
+            import re
+            ncr_keywords = ['delhi', 'noida', 'greater noida', 'gurugram', 'gurgaon', 'faridabad', 'ghaziabad']
+            unique_stations = {}
 
-                if search_data.get("status") == "ok":
-                    station_items = search_data.get("data", [])
-                    self.stdout.write(f"    Found {len(station_items)} stations in Delhi region.")
+            for kw in ncr_keywords:
+                try:
+                    search_url = f"https://api.waqi.info/search/?keyword={urllib.parse.quote(kw)}&token={waqi_key}"
+                    req = urllib.request.Request(search_url, headers={'User-Agent': 'Vayumitra/2.0'})
+                    with urllib.request.urlopen(req, timeout=15) as resp:
+                        search_data = json.loads(resp.read().decode('utf-8'))
 
-                    for item in station_items[:limit]:
-                        try:
+                    if search_data.get("status") == "ok":
+                        items = search_data.get("data", [])
+                        for item in items:
                             uid = item.get("uid")
-                            if not uid:
-                                continue
-                            station_id = f"site_{uid}"
-                            name = item.get("station", {}).get("name", f"Station {uid}")
-                            geo = item.get("station", {}).get("geo", [DELHI_LAT, DELHI_LON])
-                            lat = float(geo[0]) if len(geo) > 0 else DELHI_LAT
-                            lon = float(geo[1]) if len(geo) > 1 else DELHI_LON
-                            
-                            # Keep lat/lon within valid bounds
-                            lat = max(-90.0, min(90.0, lat))
-                            lon = max(-180.0, min(180.0, lon))
+                            if uid and uid not in unique_stations:
+                                unique_stations[uid] = item
+                except Exception as e:
+                    self.stdout.write(self.style.WARNING(f"    Failed searching keyword {kw}: {e}"))
 
-                            locality = name.split(",")[0].strip()
+            self.stdout.write(f"    Discovered {len(unique_stations)} unique monitoring stations across NCR.")
 
+            station_list = list(unique_stations.values())[:limit]
+            for item in station_list:
+                try:
+                    uid = item.get("uid")
+                    if not uid:
+                        continue
+                    station_id = f"site_{uid}"
+                    raw_name = item.get("station", {}).get("name", f"Station {uid}")
+                    # Clean out unicode artifacts
+                    name = re.sub(r'[^\x20-\x7E\u0900-\u097F,\.\-\(\)\/ ]', '', raw_name).strip()
+                    if not name:
+                        name = f"Station {uid}"
+
+                    geo = item.get("station", {}).get("geo", [DELHI_LAT, DELHI_LON])
+                    lat = float(geo[0]) if len(geo) > 0 else DELHI_LAT
+                    lon = float(geo[1]) if len(geo) > 1 else DELHI_LON
+                    
+                    lat = max(-90.0, min(90.0, lat))
+                    lon = max(-180.0, min(180.0, lon))
+
+                    locality = name.split(",")[0].strip()
+
+                    # Classify City accurately across NCR
+                    name_lower = name.lower()
+                    if 'noida' in name_lower:
+                        city = 'Noida'
+                    elif 'gurgaon' in name_lower or 'gurugram' in name_lower:
+                        city = 'Gurgaon'
+                    elif 'faridabad' in name_lower:
+                        city = 'Faridabad'
+                    elif 'ghaziabad' in name_lower:
+                        city = 'Ghaziabad'
+                    else:
+                        city = 'Delhi'
+
+                    if not dry_run:
+                        station, _ = Station.objects.update_or_create(
+                            station_id=station_id,
+                            defaults={
+                                "name": name,
+                                "locality": locality,
+                                "city": city,
+                                "lat": lat,
+                                "lon": lon,
+                                "is_active": True,
+                            }
+                        )
+                    stations_synced += 1
+
+                    # Fetch detailed feed for this station
+                    feed_url = f"https://api.waqi.info/feed/@{uid}/?token={waqi_key}"
+                    feed_req = urllib.request.Request(feed_url, headers={'User-Agent': 'Vayumitra/2.0'})
+                    with urllib.request.urlopen(feed_req, timeout=10) as feed_resp:
+                        feed_json = json.loads(feed_resp.read().decode('utf-8'))
+
+                    if feed_json.get("status") == "ok":
+                        data = feed_json.get("data", {})
+                        aqi_raw = data.get("aqi")
+                        aqi_val = int(aqi_raw) if (aqi_raw is not None and str(aqi_raw).isdigit()) else None
+                        dominant = data.get("dominentpol", "pm25")
+                        cat_id = get_aqi_category_id(aqi_val)
+
+                        iaqi = data.get("iaqi", {})
+                        pm25 = iaqi.get("pm25", {}).get("v")
+                        pm10 = iaqi.get("pm10", {}).get("v")
+                        no2 = iaqi.get("no2", {}).get("v")
+                        so2 = iaqi.get("so2", {}).get("v")
+                        co = iaqi.get("co", {}).get("v")
+                        o3 = iaqi.get("o3", {}).get("v")
+                        nh3 = iaqi.get("nh3", {}).get("v")
+
+                        time_info = data.get("time", {})
+                        ts_str = time_info.get("iso")
+                        if ts_str:
+                            try:
+                                ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+                            except Exception:
+                                ts = timezone.now()
+                        else:
+                            ts = timezone.now()
+
+                        ts = ts.replace(minute=0, second=0, microsecond=0)
+
+                        # Stale / inactive feed check (> 7 days without update)
+                        if (timezone.now() - ts).days > 7:
                             if not dry_run:
-                                station, _ = Station.objects.update_or_create(
-                                    station_id=station_id,
-                                    defaults={
-                                        "name": name,
-                                        "locality": locality,
-                                        "city": "Delhi",
-                                        "lat": lat,
-                                        "lon": lon,
-                                        "is_active": True,
-                                    }
-                                )
-                            stations_synced += 1
+                                Station.objects.filter(station_id=station_id).update(is_active=False)
+                            continue
 
-                            # Fetch detailed feed for this station
-                            feed_url = f"https://api.waqi.info/feed/@{uid}/?token={waqi_key}"
-                            feed_req = urllib.request.Request(feed_url, headers={'User-Agent': 'Vayumitra/2.0'})
-                            with urllib.request.urlopen(feed_req, timeout=10) as feed_resp:
-                                feed_json = json.loads(feed_resp.read().decode('utf-8'))
+                        if not dry_run:
+                            # Deactivate older duplicate station at identical coordinates
+                            Station.objects.filter(
+                                lat__range=(lat - 0.0005, lat + 0.0005),
+                                lon__range=(lon - 0.0005, lon + 0.0005)
+                            ).exclude(station_id=station_id).update(is_active=False)
+                            # Upsert ObservationHourly
+                            ObservationHourly.objects.update_or_create(
+                                station=station,
+                                ts=ts,
+                                defaults={
+                                    "pm25": pm25,
+                                    "pm10": pm10,
+                                    "no2": no2,
+                                    "so2": so2,
+                                    "co": co,
+                                    "o3": o3,
+                                    "nh3": nh3,
+                                    "qc_flag": "ok",
+                                    "source": "WAQI",
+                                }
+                            )
 
-                            if feed_json.get("status") == "ok":
-                                data = feed_json.get("data", {})
-                                aqi_raw = data.get("aqi")
-                                aqi_val = int(aqi_raw) if (aqi_raw is not None and str(aqi_raw).isdigit()) else None
-                                dominant = data.get("dominentpol", "pm25")
-                                cat_id = get_aqi_category_id(aqi_val)
+                            # Upsert AQIHourly
+                            cat_obj = AQICategory.objects.filter(cat=cat_id).first() if cat_id else None
+                            AQIHourly.objects.update_or_create(
+                                station=station,
+                                ts=ts,
+                                defaults={
+                                    "aqi": aqi_val,
+                                    "dominant": dominant,
+                                    "cat": cat_obj,
+                                }
+                            )
+                        obs_synced += 1
 
-                                iaqi = data.get("iaqi", {})
-                                pm25 = iaqi.get("pm25", {}).get("v")
-                                pm10 = iaqi.get("pm10", {}).get("v")
-                                no2 = iaqi.get("no2", {}).get("v")
-                                so2 = iaqi.get("so2", {}).get("v")
-                                co = iaqi.get("co", {}).get("v")
-                                o3 = iaqi.get("o3", {}).get("v")
-                                nh3 = iaqi.get("nh3", {}).get("v")
+                except Exception as e:
+                    errors.append(f"Station {item.get('uid')} error: {str(e)}")
 
-                                time_info = data.get("time", {})
-                                ts_str = time_info.get("iso")
-                                if ts_str:
-                                    try:
-                                        ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
-                                    except Exception:
-                                        ts = timezone.now()
-                                else:
-                                    ts = timezone.now()
-
-                                # Truncate minutes to hour level
-                                ts = ts.replace(minute=0, second=0, microsecond=0)
-
-                                if not dry_run:
-                                    # Upsert ObservationHourly
-                                    ObservationHourly.objects.update_or_create(
-                                        station=station,
-                                        ts=ts,
-                                        defaults={
-                                            "pm25": pm25,
-                                            "pm10": pm10,
-                                            "no2": no2,
-                                            "so2": so2,
-                                            "co": co,
-                                            "o3": o3,
-                                            "nh3": nh3,
-                                            "qc_flag": "ok",
-                                            "source": "WAQI",
-                                        }
-                                    )
-
-                                    # Upsert AQIHourly
-                                    cat_obj = AQICategory.objects.filter(cat=cat_id).first() if cat_id else None
-                                    AQIHourly.objects.update_or_create(
-                                        station=station,
-                                        ts=ts,
-                                        defaults={
-                                            "aqi": aqi_val,
-                                            "dominant": dominant,
-                                            "cat": cat_obj,
-                                        }
-                                    )
-                                obs_synced += 1
-
-                        except Exception as e:
-                            errors.append(f"Station {item.get('uid')} error: {str(e)}")
-
-                    self.stdout.write(self.style.SUCCESS(f"    Synced {stations_synced} stations and {obs_synced} AQI observations."))
-                else:
-                    errors.append(f"WAQI response status: {search_data.get('status')}")
-
-            except Exception as e:
-                errors.append(f"WAQI Fetch Failed: {str(e)}")
-                self.stdout.write(self.style.ERROR(f"    WAQI Error: {e}"))
+            self.stdout.write(self.style.SUCCESS(f"    Synced {stations_synced} stations and {obs_synced} AQI observations across Delhi NCR."))
 
         # -------------------------------------------------------------
         # 2. FETCH CURRENT WEATHER VIA OPENWEATHER
