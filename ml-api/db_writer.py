@@ -37,13 +37,18 @@ load_env_files()
 
 def get_db_config():
     """Return database connection parameters from environment or defaults."""
-    return {
+    cfg = {
         "dbname": os.environ.get("DB_NAME", "vayumitra"),
         "user": os.environ.get("DB_USER", "postgres"),
         "password": os.environ.get("DB_PASSWORD", ""),
         "host": os.environ.get("DB_HOST", "localhost"),
         "port": os.environ.get("DB_PORT", "5432"),
     }
+    sslmode = os.environ.get("DB_SSLMODE")
+    if sslmode:
+        cfg["sslmode"] = sslmode
+    return cfg
+
 
 
 def get_connection():
