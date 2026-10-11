@@ -22,7 +22,8 @@ class LiveTrafficAPIView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        region = request.query_params.get('region', None)
+        params = getattr(request, 'query_params', getattr(request, 'GET', {}))
+        region = params.get('region', None)
 
         # 1. Fetch active stations with valid geographic coordinates
         stations_qs = Station.objects.filter(is_active=True).exclude(lat__isnull=True).exclude(lon__isnull=True)
@@ -48,9 +49,10 @@ class LiveTrafficAPIView(APIView):
         obs_map = {obs.station_id: obs for obs in obs_qs}
 
         # 3. Read traffic API configuration
-        api_key = getattr(settings, 'TRAFFIC_API_KEY', '') or request.query_params.get('api_key', '')
+        api_key = getattr(settings, 'TRAFFIC_API_KEY', '') or params.get('api_key', '')
         provider = (getattr(settings, 'TRAFFIC_PROVIDER', 'tomtom') or 'tomtom').lower()
         live_api_configured = bool(api_key and api_key.strip() and api_key != 'your_traffic_api_key_here')
+
 
         # 4. IST Diurnal Rush-Hour Profile (UTC + 5:30)
         utc_now = datetime.datetime.now(datetime.timezone.utc)

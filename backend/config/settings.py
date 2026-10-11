@@ -14,6 +14,8 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
 
 TRAFFIC_API_KEY = env('TRAFFIC_API_KEY', default='')
 TRAFFIC_PROVIDER = env('TRAFFIC_PROVIDER', default='tomtom')
+# Live traffic telemetry active
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
